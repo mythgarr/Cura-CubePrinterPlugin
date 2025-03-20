@@ -25,6 +25,7 @@ import platform
 import shutil
 import zipfile
 import json
+from pathlib import Path
 
 PLUGIN_NAME = 'CubePrinterPlugin'
 
@@ -32,13 +33,12 @@ with open(f'./plugins/{PLUGIN_NAME}/plugin.json') as json_file:
     plugin_json = json.load(json_file)
     json_file.close()
 
-RELEASE_DIR = os.path.abspath('./RELEASE/' + PLUGIN_NAME)
-RELEASE_PLUGINS_DIR = os.path.abspath(os.path.join(RELEASE_DIR, 'files/plugins'))
-CURA_PACKAGE_FILE = os.path.abspath('./RELEASE/' + PLUGIN_NAME + '-' + str(plugin_json["version"]) + '.curapackage')
-ULTIMAKER_ZIP = os.path.abspath('./RELEASE/' + PLUGIN_NAME + '.zip')
-PLUGIN_DIR = os.path.join(RELEASE_DIR, 'files/plugins/' + PLUGIN_NAME)
-
-WKHTMLTOPDF_DIR = "c:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe"
+RELEASE_DIR = Path('./RELEASE').absolute()
+RELEASE_TEMP_DIR = RELEASE_DIR / PLUGIN_NAME
+RELEASE_PLUGINS_DIR = RELEASE_TEMP_DIR / 'files/plugins'
+CURA_PACKAGE_FILE = RELEASE_DIR / f'{PLUGIN_NAME}-{plugin_json["version"]}.curapackage'
+ULTIMAKER_ZIP = RELEASE_DIR / f'{PLUGIN_NAME}.zip'
+PLUGIN_DIR = RELEASE_TEMP_DIR / 'files' / 'plugins' / PLUGIN_NAME
 
 ALL_PLUGINS = [PLUGIN_NAME, 'CubeWriter', 'Cube3Writer', 'CubexWriter', 'CubeproWriter']
 
@@ -47,32 +47,30 @@ ALL_PLUGINS = [PLUGIN_NAME, 'CubeWriter', 'Cube3Writer', 'CubexWriter', 'Cubepro
 ## cleanup & make directories
 ################################
 
-if(os.path.exists(RELEASE_DIR)):
-    shutil.rmtree(RELEASE_DIR)
+if(os.path.exists(RELEASE_TEMP_DIR)):
+    shutil.rmtree(RELEASE_TEMP_DIR)
 
 # delete existing files
-for item in ['./README.html', './README.pdf', CURA_PACKAGE_FILE,
-             os.path.join(RELEASE_DIR, 'files/plugins/' + PLUGIN_NAME + '/' + PLUGIN_NAME + '.zip')]:
-    print('Checking '+ os.path.abspath(item))
-    if os.path.exists(os.path.abspath(item)):
-        ('Deleting ' + os.path.abspath(item))
-        os.remove(os.path.abspath(item))
+for item in [Path('README.html'), Path('README.pdf'), CURA_PACKAGE_FILE,
+             PLUGIN_DIR / f'{PLUGIN_NAME}.zip']:
+    print(f'Checking {item.absolute()}')
+    if item.exists():
+        print(f'Deleting {item.absolute()}')
+        item.unlink()
 
 # make new dirs
-if not os.path.exists(RELEASE_DIR):
-    os.makedirs(RELEASE_DIR)
+RELEASE_TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
 dirs = [
-    RELEASE_DIR,
-    os.path.join(RELEASE_DIR, 'files'),
-    os.path.join(RELEASE_DIR, RELEASE_PLUGINS_DIR)]
+    RELEASE_TEMP_DIR,
+    RELEASE_TEMP_DIR / 'files',
+    RELEASE_PLUGINS_DIR]
     
 for item in ALL_PLUGINS:
-    dirs.append(os.path.join(RELEASE_PLUGINS_DIR, item))
+    dirs.append(RELEASE_PLUGINS_DIR / item)
 
 for item in dirs:
-    if not os.path.exists(item):
-        os.makedirs(item)
+    item.mkdir(parents=True, exist_ok=True)
 
 ################################
 ## Step 2
@@ -114,7 +112,7 @@ zipList = {
 
 for file_name, file_path in zipList.items():
     if file_name.endswith('/'):
-        shutil.copytree(os.path.abspath(file_path + file_name), os.path.join(PLUGIN_DIR, file_name))
+        shutil.copytree(os.path.abspath(file_path + file_name), PLUGIN_DIR / file_name)
     else:
         shutil.copy2(os.path.abspath(file_path + file_name), PLUGIN_DIR)
 
@@ -122,7 +120,7 @@ for file_name, file_path in zipList.items():
 ## Step 3
 ## zip the files copied above
 ################################
-internal_zip_file_name = os.path.join(PLUGIN_DIR, PLUGIN_NAME + '.zip')
+internal_zip_file_name = PLUGIN_DIR / f'{PLUGIN_NAME}.zip'
 z = zipfile.ZipFile(internal_zip_file_name, 'w', zipfile.ZIP_DEFLATED)
 for file_name, file_path in zipList.items():
     if file_name.endswith('/'):
@@ -137,10 +135,11 @@ for file_name, file_path in zipList.items():
 ## now delete the files that were copied in Step 2
 ################################
 for file_name, file_path in zipList.items():
-    if file_name.endswith('/'):
-        shutil.rmtree(os.path.join(PLUGIN_DIR, file_name))
-    else:   
-        os.remove(os.path.join(PLUGIN_DIR, file_name))
+    path = PLUGIN_DIR / file_name
+    if path.is_dir():
+        shutil.rmtree(path)
+    else:
+        path.unlink()
 
 if platform.system() == "Windows":    
     ################################
@@ -148,7 +147,8 @@ if platform.system() == "Windows":
     ## Create the README.pdf file from
     ## the markdown
     ################################
-    if not os.path.exists(WKHTMLTOPDF_DIR):
+    WKHTMLTOPDF_DIR = Path("c:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+    if not WKHTMLTOPDF_DIR.exists():
         print("wkhtmltopdf not found - skipping README.pdf generation")
     else:
         currDir = os.getcwd()
@@ -163,7 +163,7 @@ if platform.system() == "Windows":
 ## Copy the remaining plugin files
 ################################
 for item in ALL_PLUGINS:
-    shutil.copytree(os.path.abspath('./plugins/' + item),  os.path.join(RELEASE_PLUGINS_DIR, item), dirs_exist_ok = True)
+    shutil.copytree(os.path.abspath('./plugins/' + item),  RELEASE_PLUGINS_DIR / item, dirs_exist_ok = True)
 
 ################################
 ## Step 7
@@ -174,16 +174,18 @@ remaining_files = [os.path.abspath('./LICENSE'),
                    os.path.abspath('./resources/package.json')]
 
 for file in remaining_files:
-    shutil.copy2(file, RELEASE_DIR)
+    shutil.copy2(file, RELEASE_TEMP_DIR)
 
 ################################
 ## Step 8
 ## Zip up the plugin for release
 ################################
 with zipfile.ZipFile(CURA_PACKAGE_FILE, 'w', zipfile.ZIP_DEFLATED) as z:
-    for root, dirs, files in os.walk(RELEASE_DIR):
-        for file in files:
-            z.write(os.path.join(root, file), os.path.join(root, file).replace(RELEASE_DIR, ""))
+    for item in RELEASE_TEMP_DIR.rglob('*'):
+        if not item.is_file():
+            continue
+        relative_path = item.relative_to(RELEASE_TEMP_DIR)
+        z.write(item, relative_path)
 
 
 ################################
@@ -193,14 +195,25 @@ with zipfile.ZipFile(CURA_PACKAGE_FILE, 'w', zipfile.ZIP_DEFLATED) as z:
 shutil.copy2(os.path.abspath('./LICENSE'), PLUGIN_DIR)
 
 with zipfile.ZipFile(ULTIMAKER_ZIP, 'w', zipfile.ZIP_DEFLATED) as z:
-    for root, dirs, files in os.walk(RELEASE_PLUGINS_DIR):
-        for file in files:
-            print(os.path.join(root, file))
-            z.write(os.path.join(root, file), os.path.join(root, file).replace(RELEASE_PLUGINS_DIR, ''))
+    for item in RELEASE_PLUGINS_DIR.rglob('*'):
+        if not item.is_file():
+            continue
+        relative_path = item.relative_to(RELEASE_PLUGINS_DIR)
+        z.write(item, relative_path)
 
 
 ################################
 ## Step 10
 ## Cleanup the files and directories
 ################################
-shutil.rmtree(RELEASE_DIR)
+shutil.rmtree(RELEASE_TEMP_DIR)
+
+
+# List the contents of the directory
+try:
+    directory_contents = RELEASE_DIR.rglob('*')
+    # Print the contents
+    for item in directory_contents:
+        print(item.absolute())
+except FileNotFoundError:
+    print(f"The directory {directory_path} does not exist.")
