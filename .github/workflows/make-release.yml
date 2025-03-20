@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+env:
+    ARTIFACT_NAME: CubePrinterPlugin.zip
+    RELEASE_PATH: RELEASES/CubePrinterPlugin.zip
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,14 +29,20 @@ jobs:
 
     - name: Execute make_release.py
       run: python tools/make_release.py
+      
+    - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+            name: ReleaseZIP
+            path: ${{ env.RELEASE_PATH }}
 
   release:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
 
     - name: Create GitHub Release
       id: create_release
@@ -51,6 +61,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: RELEASES/CubePrinterPlugin.zip
-        asset_name: CubePrinterPlugin.zip
+        asset_path: ${{ env.RELEASE_PATH }}
+        asset_name: ${{ env.ARTIFACT_NAME }}
         asset_content_type: application/zip
