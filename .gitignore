@@ -1,3 +1,4 @@
 *.bak
 RELEASE/
 plugins/CubePrinterPlugin/README.pdf
+*venv/

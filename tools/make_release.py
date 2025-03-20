@@ -21,20 +21,21 @@
 #    (pip install grip)
 #####################################################################
 import os
+import platform
 import shutil
 import zipfile
 import json
 
 PLUGIN_NAME = 'CubePrinterPlugin'
 
-with open(f'../plugins/{PLUGIN_NAME}/plugin.json') as json_file:
+with open(f'./plugins/{PLUGIN_NAME}/plugin.json') as json_file:
     plugin_json = json.load(json_file)
     json_file.close()
 
-RELEASE_DIR = os.path.abspath('../RELEASE/' + PLUGIN_NAME)
+RELEASE_DIR = os.path.abspath('./RELEASE/' + PLUGIN_NAME)
 RELEASE_PLUGINS_DIR = os.path.abspath(os.path.join(RELEASE_DIR, 'files/plugins'))
-CURA_PACKAGE_FILE = os.path.abspath('../RELEASE/' + PLUGIN_NAME + '-' + str(plugin_json["version"]) + '.curapackage')
-ULTIMAKER_ZIP = os.path.abspath('../RELEASE/' + PLUGIN_NAME + '.zip')
+CURA_PACKAGE_FILE = os.path.abspath('./RELEASE/' + PLUGIN_NAME + '-' + str(plugin_json["version"]) + '.curapackage')
+ULTIMAKER_ZIP = os.path.abspath('./RELEASE/' + PLUGIN_NAME + '.zip')
 PLUGIN_DIR = os.path.join(RELEASE_DIR, 'files/plugins/' + PLUGIN_NAME)
 
 WKHTMLTOPDF_DIR = "c:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe"
@@ -50,7 +51,7 @@ if(os.path.exists(RELEASE_DIR)):
     shutil.rmtree(RELEASE_DIR)
 
 # delete existing files
-for item in ['../README.html', '../README.pdf', CURA_PACKAGE_FILE,
+for item in ['./README.html', './README.pdf', CURA_PACKAGE_FILE,
              os.path.join(RELEASE_DIR, 'files/plugins/' + PLUGIN_NAME + '/' + PLUGIN_NAME + '.zip')]:
     print('Checking '+ os.path.abspath(item))
     if os.path.exists(os.path.abspath(item)):
@@ -80,35 +81,35 @@ for item in dirs:
 ## and the quality files
 ################################
 zipList = {
-    'CubePro.def.json':             '../resources/definitions/',
-    'CubeProDuo.def.json':          '../resources/definitions/',
-    'CubeProTrio.def.json':         '../resources/definitions/',
-    'Cube.def.json':                '../resources/definitions/',
-    'Cube2.def.json':               '../resources/definitions/',
-    'Cube3.def.json':               '../resources/definitions/',
-    'CubeX.def.json':               '../resources/definitions/',
-    'CubeXDuo.def.json':            '../resources/definitions/',
-    'CubeXTrio.def.json':           '../resources/definitions/',
-    'CubePro_extruder_0.def.json':  '../resources/extruders/',
-    'CubePro_extruder_1.def.json':  '../resources/extruders/',
-    'CubePro_extruder_2.def.json':  '../resources/extruders/',
-    'Cube_extruder_0.def.json':     '../resources/extruders/',
-    'Cube2_extruder_0.def.json':     '../resources/extruders/',
-    'Cube3_extruder_0.def.json':    '../resources/extruders/',
-    'Cube3_extruder_1.def.json':    '../resources/extruders/',
-    'CubeX_extruder_0.def.json':    '../resources/extruders/',
-    'CubeX_extruder_1.def.json':    '../resources/extruders/',
-    'CubeX_extruder_2.def.json':    '../resources/extruders/',
-    'CubePro_platform.stl':         '../resources/meshes/',
-    'CubePro/':                     '../resources/quality/',
-    'CubeProDuo/':                  '../resources/quality/',
-    'CubeProTrio/':                 '../resources/quality/',
-    'CubeX/':                       '../resources/quality/',
-    'CubeXDuo/':                    '../resources/quality/',
-    'CubeXTrio/':                   '../resources/quality/',
-    'Cube/':                        '../resources/quality/',
-    'Cube2/':                       '../resources/quality/',
-    'Cube3/':                       '../resources/quality/'
+    'CubePro.def.json':             './resources/definitions/',
+    'CubeProDuo.def.json':          './resources/definitions/',
+    'CubeProTrio.def.json':         './resources/definitions/',
+    'Cube.def.json':                './resources/definitions/',
+    'Cube2.def.json':               './resources/definitions/',
+    'Cube3.def.json':               './resources/definitions/',
+    'CubeX.def.json':               './resources/definitions/',
+    'CubeXDuo.def.json':            './resources/definitions/',
+    'CubeXTrio.def.json':           './resources/definitions/',
+    'CubePro_extruder_0.def.json':  './resources/extruders/',
+    'CubePro_extruder_1.def.json':  './resources/extruders/',
+    'CubePro_extruder_2.def.json':  './resources/extruders/',
+    'Cube_extruder_0.def.json':     './resources/extruders/',
+    'Cube2_extruder_0.def.json':     './resources/extruders/',
+    'Cube3_extruder_0.def.json':    './resources/extruders/',
+    'Cube3_extruder_1.def.json':    './resources/extruders/',
+    'CubeX_extruder_0.def.json':    './resources/extruders/',
+    'CubeX_extruder_1.def.json':    './resources/extruders/',
+    'CubeX_extruder_2.def.json':    './resources/extruders/',
+    'CubePro_platform.stl':         './resources/meshes/',
+    'CubePro/':                     './resources/quality/',
+    'CubeProDuo/':                  './resources/quality/',
+    'CubeProTrio/':                 './resources/quality/',
+    'CubeX/':                       './resources/quality/',
+    'CubeXDuo/':                    './resources/quality/',
+    'CubeXTrio/':                   './resources/quality/',
+    'Cube/':                        './resources/quality/',
+    'Cube2/':                       './resources/quality/',
+    'Cube3/':                       './resources/quality/'
 }
 
 for file_name, file_path in zipList.items():
@@ -162,15 +163,15 @@ if platform.system() == "Windows":
 ## Copy the remaining plugin files
 ################################
 for item in ALL_PLUGINS:
-    shutil.copytree(os.path.abspath('../plugins/' + item),  os.path.join(RELEASE_PLUGINS_DIR, item), dirs_exist_ok = True)
+    shutil.copytree(os.path.abspath('./plugins/' + item),  os.path.join(RELEASE_PLUGINS_DIR, item), dirs_exist_ok = True)
 
 ################################
 ## Step 7
 ## Copy required files to the release directory
 ################################
-remaining_files = [os.path.abspath('../LICENSE'),
-                   os.path.abspath('../docs/icon.png'),
-                   os.path.abspath('../resources/package.json')]
+remaining_files = [os.path.abspath('./LICENSE'),
+                   os.path.abspath('./docs/icon.png'),
+                   os.path.abspath('./resources/package.json')]
 
 for file in remaining_files:
     shutil.copy2(file, RELEASE_DIR)
@@ -189,7 +190,7 @@ with zipfile.ZipFile(CURA_PACKAGE_FILE, 'w', zipfile.ZIP_DEFLATED) as z:
 ## Step 9
 ## Make the ultimaker zip file for upload to contribute.ultimaker.com
 ################################
-shutil.copy2(os.path.abspath('../LICENSE'), PLUGIN_DIR)
+shutil.copy2(os.path.abspath('./LICENSE'), PLUGIN_DIR)
 
 with zipfile.ZipFile(ULTIMAKER_ZIP, 'w', zipfile.ZIP_DEFLATED) as z:
     for root, dirs, files in os.walk(RELEASE_PLUGINS_DIR):
