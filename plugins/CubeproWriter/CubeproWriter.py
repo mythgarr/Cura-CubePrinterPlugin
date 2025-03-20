@@ -174,8 +174,8 @@ class CubeproWriter(QObject, MeshWriter):
         extruders = application.getExtruderManager().getUsedExtruderStacks()
         extruders_index = dict()
         for x in extruders:            
-            Logger.log("i", self._plugin_name + F" [#{int(x.name[-1:])} of {len(extruders)}] - id:'{x.id}', name: '{x.name}': materialID: '{x.material}', material: '{x.material.getMetaDataEntry('material')}'")
-            extruders_index[int(x.name[-1:])] = x # TODO: fix the hack, as only one extruder may be returned in extruders[]
+            Logger.log("i", F"{self._plugin_name} [#{int(x.name[-1:])} of {len(extruders)}] - id:'{x.id}', position: {x.position}, name: '{x.name}': materialID: '{x.material}', material: '{x.material.getMetaDataEntry('material')}'")
+            extruders_index[x.position] = x
         
         print_time_mins = round(float(application.getPrintInformation().currentPrintTime.getDisplayString(DurationFormat.Format.Seconds)) / 60 * _print_time_correction_factor)
         
@@ -222,8 +222,9 @@ class CubeproWriter(QObject, MeshWriter):
                 
                 elif line.startswith("^MaterialCode"):
                     extruder_num = int(line[14])
-                    if extruder_num in extruders_index and extruders_index[extruder_num].isEnabled:
-                        material_mapped = self._material_map.get(extruders_index[extruder_num].material.getMetaDataEntry("material"))
+                    extruder = extruders_index.get(extruder_num, None)
+                    if extruder and extruder.isEnabled:
+                        material_mapped = self._material_map.get(extruder.material.getMetaDataEntry("material"))
                         if material_mapped is None:
                             error_message = self._plugin_name + " - Unsupported filament type selected."
                             Logger.log("e", error_message)
@@ -235,7 +236,8 @@ class CubeproWriter(QObject, MeshWriter):
 
                 elif line.startswith("^MaterialLength"):
                     extruder_num = int(line[16])
-                    if extruder_num <= len(extruders) and extruders[extruder_num - 1].isEnabled:
+                    extruder = extruders_index.get(extruder_num, None)
+                    if extruder and extruder.isEnabled:
                         line = f"^MaterialLengthE{extruder_num}:1" # The printer doesn't actually need to know how much
 
                 elif line.startswith("^Time"):

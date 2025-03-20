@@ -141,17 +141,21 @@ for file_name, file_path in zipList.items():
     else:   
         os.remove(os.path.join(PLUGIN_DIR, file_name))
 
-################################
-## Step 5
-## Create the README.pdf file from
-## the markdown
-################################
-currDir = os.getcwd()
-os.chdir('..')
-os.system('python -m grip README.md --export README.html')
-os.system('"{0}" {1} {2} {3}'.format(WKHTMLTOPDF_DIR, '--enable-local-file-access', 'README.html', os.path.join(PLUGIN_DIR,'README.pdf')))
-shutil.copy2(os.path.join(PLUGIN_DIR, 'README.pdf'), '.')
-os.chdir(currDir)
+if platform.system() == "Windows":    
+    ################################
+    ## Step 5
+    ## Create the README.pdf file from
+    ## the markdown
+    ################################
+    if not os.path.exists(WKHTMLTOPDF_DIR):
+        print("wkhtmltopdf not found - skipping README.pdf generation")
+    else:
+        currDir = os.getcwd()
+        os.chdir('..')
+        os.system('python -m grip README.md --export README.html')
+        os.system('"{0}" {1} {2} {3}'.format(WKHTMLTOPDF_DIR, '--enable-local-file-access', 'README.html', os.path.join(PLUGIN_DIR,'README.pdf')))
+        shutil.copy2(os.path.join(PLUGIN_DIR, 'README.pdf'), '.')
+        os.chdir(currDir)
 
 ################################
 ## Step 6
@@ -175,10 +179,10 @@ for file in remaining_files:
 ## Step 8
 ## Zip up the plugin for release
 ################################
-z = zipfile.ZipFile(CURA_PACKAGE_FILE, 'w', zipfile.ZIP_DEFLATED)
-for root, dirs, files in os.walk(RELEASE_DIR):
-    for file in files:
-        z.write(os.path.join(root, file), os.path.join(root, file).replace(RELEASE_DIR, ""))
+with zipfile.ZipFile(CURA_PACKAGE_FILE, 'w', zipfile.ZIP_DEFLATED) as z:
+    for root, dirs, files in os.walk(RELEASE_DIR):
+        for file in files:
+            z.write(os.path.join(root, file), os.path.join(root, file).replace(RELEASE_DIR, ""))
 
 
 ################################
@@ -187,11 +191,11 @@ for root, dirs, files in os.walk(RELEASE_DIR):
 ################################
 shutil.copy2(os.path.abspath('../LICENSE'), PLUGIN_DIR)
 
-z = zipfile.ZipFile(ULTIMAKER_ZIP, 'w', zipfile.ZIP_DEFLATED)
-for root, dirs, files in os.walk(RELEASE_PLUGINS_DIR):
-    for file in files:
-        print(os.path.join(root, file))
-        z.write(os.path.join(root, file), os.path.join(root, file).replace(RELEASE_PLUGINS_DIR, ''))
+with zipfile.ZipFile(ULTIMAKER_ZIP, 'w', zipfile.ZIP_DEFLATED) as z:
+    for root, dirs, files in os.walk(RELEASE_PLUGINS_DIR):
+        for file in files:
+            print(os.path.join(root, file))
+            z.write(os.path.join(root, file), os.path.join(root, file).replace(RELEASE_PLUGINS_DIR, ''))
 
 
 ################################
