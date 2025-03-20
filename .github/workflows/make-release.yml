@@ -29,10 +29,54 @@ jobs:
         pip install -r tools/requirements.txt
         
     - name: Set package version
-      id: packageJson
       uses: RadovanPelka/github-action-json@v1.0.2
       with:
         path: "resources/package.json"
+        replaceWith: |
+          {
+            "version": "${{ github.ref }}"
+          }
+        
+    - name: Set plugins/Cube3Writer version
+      uses: RadovanPelka/github-action-json@v1.0.2
+      with:
+        path: "plugins/Cube3Writer/plugin.json"
+        replaceWith: |
+          {
+            "version": "${{ github.ref }}"
+          }
+        
+    - name: Set plugins/CubePrinterPlugin version
+      uses: RadovanPelka/github-action-json@v1.0.2
+      with:
+        path: "plugins/CubePrinterPlugin/plugin.json"
+        replaceWith: |
+          {
+            "version": "${{ github.ref }}"
+          }
+        
+    - name: Set plugins/CubeproWriter version
+      uses: RadovanPelka/github-action-json@v1.0.2
+      with:
+        path: "plugins/CubeproWriter/plugin.json"
+        replaceWith: |
+          {
+            "version": "${{ github.ref }}"
+          }
+        
+    - name: Set plugins/CubeWriter version
+      uses: RadovanPelka/github-action-json@v1.0.2
+      with:
+        path: "plugins/CubeWriter/plugin.json"
+        replaceWith: |
+          {
+            "version": "${{ github.ref }}"
+          }
+        
+    - name: Set plugins/CubexWriter version
+      uses: RadovanPelka/github-action-json@v1.0.2
+      with:
+        path: "plugins/CubexWriter/plugin.json"
         replaceWith: |
           {
             "version": "${{ github.ref }}"
@@ -45,7 +89,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.ARTIFACT_NAME }}
-        path: ${{ env.RELEASE_PATH }}
+        path: |
+          ${{ env.RELEASE_PATH }}
+          ${{ env.RELEASE_DIR }}/*.curapackage
 
   release:
     needs: build
@@ -60,21 +106,13 @@ jobs:
 
     - name: Create GitHub Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.RELEASE_PATH }}
-        asset_name: ${{ env.ARTIFACT_NAME }}
-        asset_content_type: application/zip
+        files: |
+          ${{ env.RELEASE_DIR }}/*
