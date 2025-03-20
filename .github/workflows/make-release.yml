@@ -7,7 +7,7 @@ on:
 
 env:
     ARTIFACT_NAME: CubePrinterPlugin.zip
-    RELEASE_PATH: RELEASES/CubePrinterPlugin.zip
+    RELEASE_PATH: RELEASE/CubePrinterPlugin.zip
 
 jobs:
   build:
