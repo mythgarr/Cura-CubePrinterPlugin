@@ -27,6 +27,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r tools/requirements.txt
+        
+    - name: Set package version
+      id: packageJson
+      uses: RadovanPelka/github-action-json@v1.0.2
+      with:
+        path: "resources/package.json"
+        replaceWith: |
+          {
+            "version": "${{ github.ref }}"
+          }
 
     - name: Execute make_release.py
       run: python tools/make_release.py
