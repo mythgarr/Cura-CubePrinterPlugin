@@ -34,7 +34,7 @@ jobs:
         path: "resources/package.json"
         replaceWith: |
           {
-            "version": "${{ github.ref }}"
+            "version": "${{ github.ref_name }}"
           }
         
     - name: Set plugins/Cube3Writer version
@@ -43,7 +43,7 @@ jobs:
         path: "plugins/Cube3Writer/plugin.json"
         replaceWith: |
           {
-            "version": "${{ github.ref }}"
+            "version": "${{ github.ref_name }}"
           }
         
     - name: Set plugins/CubePrinterPlugin version
@@ -52,7 +52,7 @@ jobs:
         path: "plugins/CubePrinterPlugin/plugin.json"
         replaceWith: |
           {
-            "version": "${{ github.ref }}"
+            "version": "${{ github.ref_name }}"
           }
         
     - name: Set plugins/CubeproWriter version
@@ -61,7 +61,7 @@ jobs:
         path: "plugins/CubeproWriter/plugin.json"
         replaceWith: |
           {
-            "version": "${{ github.ref }}"
+            "version": "${{ github.ref_name }}"
           }
         
     - name: Set plugins/CubeWriter version
@@ -70,7 +70,7 @@ jobs:
         path: "plugins/CubeWriter/plugin.json"
         replaceWith: |
           {
-            "version": "${{ github.ref }}"
+            "version": "${{ github.ref_name }}"
           }
         
     - name: Set plugins/CubexWriter version
@@ -79,7 +79,7 @@ jobs:
         path: "plugins/CubexWriter/plugin.json"
         replaceWith: |
           {
-            "version": "${{ github.ref }}"
+            "version": "${{ github.ref_name }}"
           }
 
     - name: Execute make_release.py
@@ -110,8 +110,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        name: Release ${{ github.ref }}
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
         files: |
